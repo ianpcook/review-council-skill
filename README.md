@@ -7,40 +7,58 @@ Install the `review-council` agent skill: a single entrypoint that runs a multi-
 From GitHub:
 
 ```bash
-npx github:ianpcook/review-council-skill install
+npx --yes github:ianpcook/review-council-skill install
 ```
 
 Choose a target:
 
 ```bash
-npx github:ianpcook/review-council-skill install --target codex
-npx github:ianpcook/review-council-skill install --target claude
-npx github:ianpcook/review-council-skill install --target agents
-npx github:ianpcook/review-council-skill install --target cursor
+npx --yes github:ianpcook/review-council-skill install --target codex
+npx --yes github:ianpcook/review-council-skill install --target claude
+npx --yes github:ianpcook/review-council-skill install --target agents
+npx --yes github:ianpcook/review-council-skill install --target cursor
 ```
 
 Install to a custom skills directory:
 
 ```bash
-npx github:ianpcook/review-council-skill install --path ~/.codex/skills
+npx --yes github:ianpcook/review-council-skill install --path ~/.codex/skills
 ```
 
 Dry run:
 
 ```bash
-npx github:ianpcook/review-council-skill install --dry-run
+npx --yes github:ianpcook/review-council-skill install --dry-run
 ```
 
 Overwrite an existing install:
 
 ```bash
-npx github:ianpcook/review-council-skill install --force
+npx --yes github:ianpcook/review-council-skill install --force
 ```
 
 If this package is later published to npm, the same installer works as:
 
 ```bash
 npx review-council-skill install
+```
+
+## npm Warnings
+
+If `npx` prints warnings like:
+
+```text
+npm warn Unknown project config "auto-install-peers"
+npm warn Unknown project config "strict-peer-dependencies"
+npm warn Unknown project config "shamefully-hoist"
+```
+
+those warnings usually come from a local `.npmrc` containing pnpm-specific settings. They are not emitted by this package and do not normally block installation.
+
+If `npx` prints `Need to install the following packages`, that is the normal interactive prompt. Use `--yes` to skip it:
+
+```bash
+npx --yes github:ianpcook/review-council-skill install
 ```
 
 ## What It Does
