@@ -1,0 +1,8 @@
+review-council-skill includes a maintainability review lane adapted from Cursor's
+cursor-team-kit Thermo-Nuclear Code Quality Review rubric.
+
+Original skill:
+https://github.com/cursor/plugins/blob/main/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md
+
+Original subagent wrapper:
+https://github.com/cursor/plugins/blob/main/cursor-team-kit/agents/thermo-nuclear-code-quality-review.md

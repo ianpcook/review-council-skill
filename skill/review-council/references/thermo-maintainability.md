@@ -1,6 +1,11 @@
 # Thermo Maintainability Lane
 
-Adopted from Cursor's `cursor-team-kit` `thermo-nuclear-code-quality-review` skill.
+This lane adapts the Thermo-Nuclear Code Quality Review rubric from Cursor's `cursor-team-kit` plugin.
+
+Original sources:
+
+- Skill: https://github.com/cursor/plugins/blob/main/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md
+- Subagent wrapper: https://github.com/cursor/plugins/blob/main/cursor-team-kit/agents/thermo-nuclear-code-quality-review.md
 
 ## Mission
 

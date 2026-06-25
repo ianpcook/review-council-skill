@@ -57,6 +57,15 @@ Default lanes:
 
 The council is review-only. It should not edit files or run a fixer during the review pass.
 
+## Attribution
+
+The `thermo` maintainability lane adapts the Thermo-Nuclear Code Quality Review rubric from Cursor's `cursor-team-kit` plugin:
+
+- Original skill: https://github.com/cursor/plugins/blob/main/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md
+- Original subagent wrapper: https://github.com/cursor/plugins/blob/main/cursor-team-kit/agents/thermo-nuclear-code-quality-review.md
+
+The `review-council` package uses that idea as one council member and adds separate correctness, security/privacy, test-verification, and product/API review lanes.
+
 ## Usage
 
 After installing, ask your agent to use the skill:
