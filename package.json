@@ -1,0 +1,21 @@
+{
+  "name": "review-council-skill",
+  "version": "0.1.0",
+  "description": "Install the review-council agent skill: a multi-lane read-only code review council.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "review-council-skill": "./bin/review-council-skill.js"
+  },
+  "files": [
+    "bin/",
+    "skill/"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "install-skill": "node ./bin/review-council-skill.js install",
+    "dry-run": "node ./bin/review-council-skill.js install --dry-run"
+  }
+}
