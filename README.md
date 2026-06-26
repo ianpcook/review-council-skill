@@ -10,19 +10,17 @@ From GitHub:
 npx --yes github:ianpcook/review-council-skill install
 ```
 
-By default this installs for Claude Code at:
+The installer will ask which harnesses to install for. Select one or more targets from the prompt.
 
-```text
-~/.claude/skills/review-council/
-```
-
-Choose a target:
+Install non-interactively:
 
 ```bash
-npx --yes github:ianpcook/review-council-skill install --target codex
 npx --yes github:ianpcook/review-council-skill install --target claude
+npx --yes github:ianpcook/review-council-skill install --target codex
 npx --yes github:ianpcook/review-council-skill install --target agents
 npx --yes github:ianpcook/review-council-skill install --target cursor
+npx --yes github:ianpcook/review-council-skill install --target claude,codex
+npx --yes github:ianpcook/review-council-skill install --target all
 ```
 
 Install to a custom skills directory:
