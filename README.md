@@ -10,6 +10,12 @@ From GitHub:
 npx --yes github:ianpcook/review-council-skill install
 ```
 
+By default this installs for Claude Code at:
+
+```text
+~/.claude/skills/review-council/
+```
+
 Choose a target:
 
 ```bash
@@ -103,6 +109,36 @@ For a faster pass:
 ```text
 /review-council lanes=thermo,correctness
 ```
+
+## Claude Code Notes
+
+For Claude Code, the install must land at:
+
+```text
+~/.claude/skills/review-council/SKILL.md
+```
+
+Claude Code uses the skill directory name as the slash command, so this should appear as:
+
+```text
+/review-council
+```
+
+If `/review-council` does not appear:
+
+1. Confirm the file exists:
+
+   ```bash
+   ls ~/.claude/skills/review-council/SKILL.md
+   ```
+
+2. Restart Claude Code. Claude watches existing skill directories for changes, but if `~/.claude/skills/` did not exist when the session started, a restart may be required.
+
+3. Reinstall explicitly for Claude:
+
+   ```bash
+   npx --yes github:ianpcook/review-council-skill install --target claude --force
+   ```
 
 ## License
 

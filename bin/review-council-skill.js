@@ -13,15 +13,16 @@ function usage() {
   console.log(`review-council-skill
 
 Usage:
-  npx github:<owner>/review-council-skill install [--target codex|claude|agents|cursor] [--path DIR] [--force] [--dry-run]
-  npx review-council-skill install [--target codex|claude|agents|cursor] [--path DIR] [--force] [--dry-run]
+  npx github:<owner>/review-council-skill install [--target claude|codex|agents|cursor] [--path DIR] [--force] [--dry-run]
+  npx review-council-skill install [--target claude|codex|agents|cursor] [--path DIR] [--force] [--dry-run]
 
 Targets:
-  codex   \${CODEX_HOME:-~/.codex}/skills
   claude  ~/.claude/skills
+  codex   \${CODEX_HOME:-~/.codex}/skills
   agents  ~/.agents/skills
   cursor  ~/.cursor/skills
 
+Default target: claude
 Use --path to install into any explicit skills directory.`);
 }
 
@@ -35,7 +36,7 @@ function expandHome(value) {
 function parseArgs(argv) {
   const args = {
     command: argv[2],
-    target: 'codex',
+    target: 'claude',
     path: null,
     force: false,
     dryRun: false
@@ -99,6 +100,9 @@ function main() {
   fs.rmSync(dest, { recursive: true, force: true });
   copyDir(sourceSkill, dest);
   console.log('Installed review-council skill.');
+  if (args.target === 'claude' || dest.includes(`${path.sep}.claude${path.sep}skills${path.sep}`)) {
+    console.log('Claude Code should expose this as /review-council. Restart Claude Code if the command is not visible.');
+  }
 }
 
 try {

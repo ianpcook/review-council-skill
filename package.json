@@ -1,6 +1,6 @@
 {
   "name": "review-council-skill",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Install the review-council agent skill: a multi-lane read-only code review council.",
   "license": "MIT",
   "type": "module",
