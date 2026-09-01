@@ -1,15 +1,32 @@
 {
   "name": "review-council-skill",
-  "version": "0.2.0",
-  "description": "Install the review-council agent skill: a multi-lane read-only code review council.",
+  "version": "0.3.0",
+  "description": "A portable adversarial, multi-lane code review skill for Agent Skills-compatible coding agents.",
   "license": "MIT",
+  "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ianpcook/review-council-skill.git"
+  },
+  "homepage": "https://github.com/ianpcook/review-council-skill#readme",
+  "bugs": {
+    "url": "https://github.com/ianpcook/review-council-skill/issues"
+  },
+  "keywords": [
+    "agent-skills",
+    "code-review",
+    "claude-code",
+    "codex",
+    "cursor",
+    "multi-agent"
+  ],
   "bin": {
     "review-council-skill": "./bin/review-council-skill.js"
   },
   "files": [
     "bin/",
-    "skill/",
+    "skills/",
     "NOTICE"
   ],
   "engines": {
@@ -17,6 +34,7 @@
   },
   "scripts": {
     "install-skill": "node ./bin/review-council-skill.js install",
-    "dry-run": "node ./bin/review-council-skill.js install --dry-run"
+    "dry-run": "node ./bin/review-council-skill.js install --target all --force --dry-run",
+    "test": "node --test"
   }
 }

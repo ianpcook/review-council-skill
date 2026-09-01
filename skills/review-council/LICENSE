@@ -1,22 +1,6 @@
-review-council-skill
-Copyright (c) 2026 Ian Cook
-
-The adversarial critic workflow adapts ideas from:
-
-Eric S. Qiu and Joyce Gill, "Adversarial Review: Structured Disagreement
-for Grounded Agentic Code Review," arXiv:2608.18167 (2026), accepted to
-the ICML 2026 Workshop on DL4C.
-https://arxiv.org/abs/2608.18167
-
-The thermo maintainability lane contains material adapted from Cursor's
-cursor-team-kit Thermo-Nuclear Code Quality Review:
-
-https://github.com/cursor/plugins/tree/main/cursor-team-kit/skills/thermo-nuclear-code-quality-review
-https://github.com/cursor/plugins/blob/main/cursor-team-kit/agents/thermo-nuclear-code-quality-review.md
-
-Copyright (c) 2026 Cursor
-
 MIT License
+
+Copyright (c) 2026 Ian Cook
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

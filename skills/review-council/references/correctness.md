@@ -17,7 +17,7 @@ Determine whether the diff actually implements the stated intent and acceptance 
 - Are error states explicit and correct?
 - Are migrations, transforms, cache/state changes, or fallbacks safe under partial failure?
 
-## Flag Aggressively
+## Prioritize
 
 - Plausible feature that does not match the stated feature.
 - Happy-path-only logic.
@@ -26,6 +26,10 @@ Determine whether the diff actually implements the stated intent and acceptance 
 - Broad/suppressive error handling.
 - Data transformations that lose semantics.
 - Tests that redefine correctness to match the new code.
+
+## Evidence bar
+
+For every candidate, cite the exact code path and the input, state, timing, or dependency condition that triggers the failure. Tie requirement drift to the available acceptance criterion or established behavior. If the necessary intent or runtime context is missing, record an evidence gap instead of asserting a bug.
 
 ## Output
 

@@ -1,6 +1,6 @@
 # Thermo Maintainability Lane
 
-This lane adapts the Thermo-Nuclear Code Quality Review rubric from Cursor's `cursor-team-kit` plugin.
+This lane adapts the MIT-licensed Thermo-Nuclear Code Quality Review rubric from Cursor's `cursor-team-kit` plugin. See the bundled [`NOTICE`](../NOTICE) for license attribution.
 
 Original sources:
 
@@ -24,7 +24,7 @@ Run an unusually strict review focused on implementation quality, maintainabilit
 - Is this abstraction earning its keep, or is it wrapper/indirection churn?
 - Did the diff introduce casts, `any`, `unknown`, optionality, or ad-hoc object shapes that hide an invariant?
 
-## Flag Aggressively
+## Prioritize
 
 - Complex implementation where cleaner reframing could delete whole categories of complexity.
 - Refactors that move complexity around without reducing concepts.
@@ -33,6 +33,10 @@ Run an unusually strict review focused on implementation quality, maintainabilit
 - One-off booleans, nullable modes, or feature flags tangling control flow.
 - Feature-specific logic leaking into general-purpose modules.
 - Brittle magic, thin wrappers, unnecessary casts, loose contracts, duplicated helpers, or wrong-layer logic.
+
+## Evidence bar
+
+Cite the added or changed structure and show the concrete maintenance cost: duplicated decision logic, a newly invalid dependency direction, unnecessary concepts, or a specific future change that now requires coordinated edits. File size alone is not a defect; use it as a prompt to inspect cohesion and ownership.
 
 ## Preferred Remedies
 

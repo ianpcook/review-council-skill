@@ -17,9 +17,13 @@ Tests passing is not enough. Determine whether tests would fail for the bug they
 - Are edge cases, error paths, concurrency, retries, timeouts, and partial failures covered where relevant?
 - Did the PR remove tests, skip tests, weaken lint/type checks, lower thresholds, broaden ignores, or update snapshots/goldens just to go green?
 
-## Flag Aggressively
+## Prioritize
 
 Tests that redefine correctness, tautological assertions, fake coverage, over-mocking, removed/skipped/weakened CI gates, missing negative tests, and no proof for high-risk changes.
+
+## Evidence bar
+
+Cite the exact test, assertion, mock, configuration, or uncovered production branch. Explain which realistic regression would still pass. Do not infer a missing test merely from file names or coverage percentages; connect the gap to changed behavior or risk.
 
 ## Suggested Verification
 
