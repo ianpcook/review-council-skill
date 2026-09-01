@@ -18,9 +18,13 @@ Dig deeper when the diff touches auth/session/token/identity, authorization/RBAC
 - Are dependencies real, maintained, pinned appropriately, and free of obvious supply-chain risk?
 - Are negative tests present for malformed tokens, wrong audience, cross-tenant access, malicious input, oversized input, path traversal, SSRF, injection, and file tricks where relevant?
 
-## Flag Aggressively
+## Prioritize
 
 Decorative auth/validation, client-side-only checks, missing object ownership checks, hardcoded/client-exposed secrets, unsafe logging, untrusted input into prompts/tools, broad cloud/CI permissions, unjustified dependencies, and security-sensitive changes without negative tests.
+
+## Evidence bar
+
+Identify the trust boundary, attacker-controlled input, reachable sink or protected object, and the missing or bypassable control. Do not retain a vulnerability claim that lacks a concrete attack path in the reviewed artifact. Treat secrets or personal data carefully: cite their location without reproducing sensitive values.
 
 ## Suggested Verification
 

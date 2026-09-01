@@ -8,29 +8,62 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const packageRoot = path.resolve(__dirname, '..');
-const sourceSkill = path.join(packageRoot, 'skill', 'review-council');
+const sourceSkill = path.join(packageRoot, 'skills', 'review-council');
+
+function userHome() {
+  return process.env.REVIEW_COUNCIL_SKILL_HOME || os.homedir();
+}
+
+const targetDefinitions = [
+  {
+    id: 'claude',
+    label: 'Claude Code',
+    dir: () => path.join(userHome(), '.claude', 'skills')
+  },
+  {
+    id: 'codex',
+    label: 'Codex / shared Agent Skills',
+    dir: () => path.join(userHome(), '.agents', 'skills')
+  },
+  {
+    id: 'cursor',
+    label: 'Cursor via shared Agent Skills',
+    dir: () => path.join(userHome(), '.agents', 'skills')
+  }
+];
+
+const targetAliases = new Map([
+  ['agents', 'codex']
+]);
 
 function usage() {
   console.log(`review-council-skill
 
 Usage:
-  npx github:<owner>/review-council-skill install [--target claude,codex,agents,cursor|all] [--path DIR] [--force] [--dry-run]
-  npx review-council-skill install [--target claude,codex,agents,cursor|all] [--path DIR] [--force] [--dry-run]
+  npx --yes github:ianpcook/review-council-skill#v0.3.0 install [--target claude,codex,cursor|all] [--path DIR] [--force] [--dry-run]
 
 Targets:
   claude  ~/.claude/skills
-  codex   \${CODEX_HOME:-~/.codex}/skills
-  agents  ~/.agents/skills
-  cursor  ~/.cursor/skills
+  codex   ~/.agents/skills (also accepted as "agents")
+  cursor  ~/.agents/skills (shared with Codex to prevent duplicate discovery)
 
 Run without --target or --path to choose targets interactively.
-Use --path to install into one explicit skills directory.`);
+Use --path to install into one explicit skills directory.
+When --force replaces an install, the previous directory is moved to a recoverable backup.`);
 }
 
 function expandHome(value) {
   if (!value) return value;
-  if (value === '~') return os.homedir();
-  if (value.startsWith('~/')) return path.join(os.homedir(), value.slice(2));
+  if (value === '~') return userHome();
+  if (value.startsWith('~/')) return path.join(userHome(), value.slice(2));
+  return value;
+}
+
+function nextValue(argv, index, option) {
+  const value = argv[index + 1];
+  if (!value || value.startsWith('--')) {
+    throw new Error(`${option} requires a value.`);
+  }
   return value;
 }
 
@@ -43,62 +76,59 @@ function parseArgs(argv) {
     dryRun: false
   };
 
+  if (args.command === '--help' || args.command === '-h') args.command = 'help';
+
   for (let i = 3; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === '--force') args.force = true;
     else if (arg === '--dry-run') args.dryRun = true;
-    else if (arg === '--target') args.target = argv[++i];
+    else if (arg === '--target') args.target = nextValue(argv, i++, '--target');
     else if (arg.startsWith('--target=')) args.target = arg.slice('--target='.length);
-    else if (arg === '--path') args.path = argv[++i];
+    else if (arg === '--path') args.path = nextValue(argv, i++, '--path');
     else if (arg.startsWith('--path=')) args.path = arg.slice('--path='.length);
     else if (arg === '--help' || arg === '-h') args.command = 'help';
     else throw new Error(`Unknown argument: ${arg}`);
   }
 
+  if (args.path && args.target) {
+    throw new Error('Use either --path or --target, not both.');
+  }
+
   return args;
 }
 
-function supportedTargets() {
-  return [
-    { id: 'claude', label: 'Claude Code', dir: path.join(os.homedir(), '.claude', 'skills') },
-    {
-      id: 'codex',
-      label: 'Codex',
-      dir: path.join(process.env.CODEX_HOME || path.join(os.homedir(), '.codex'), 'skills')
-    },
-    { id: 'agents', label: 'Agent Skills', dir: path.join(os.homedir(), '.agents', 'skills') },
-    { id: 'cursor', label: 'Cursor-compatible skills', dir: path.join(os.homedir(), '.cursor', 'skills') }
-  ];
+function normalizeTarget(target) {
+  return targetAliases.get(target) || target;
 }
 
-function targetDir(target) {
-  if (target === 'codex') {
-    return path.join(process.env.CODEX_HOME || path.join(os.homedir(), '.codex'), 'skills');
-  }
-  if (target === 'claude') return path.join(os.homedir(), '.claude', 'skills');
-  if (target === 'agents') return path.join(os.homedir(), '.agents', 'skills');
-  if (target === 'cursor') return path.join(os.homedir(), '.cursor', 'skills');
-  throw new Error(`Unsupported target: ${target}`);
+function targetDefinition(target) {
+  const normalized = normalizeTarget(target);
+  const definition = targetDefinitions.find((candidate) => candidate.id === normalized);
+  if (!definition) throw new Error(`Unsupported target: ${target}`);
+  return definition;
 }
 
 function parseTargets(value) {
   if (!value) return [];
-  if (value === 'all') return supportedTargets().map((target) => target.id);
-  return value
+  if (value === 'all') return targetDefinitions.map((target) => target.id);
+
+  const targets = value
     .split(',')
     .map((target) => target.trim())
-    .filter(Boolean);
+    .filter(Boolean)
+    .map((target) => targetDefinition(target).id);
+
+  return [...new Set(targets)];
 }
 
 async function promptForTargets() {
   if (!process.stdin.isTTY || !process.stdout.isTTY) {
-    throw new Error('No target provided and no interactive terminal is available. Re-run with --target claude,codex,agents,cursor or --path DIR.');
+    throw new Error('No target provided and no interactive terminal is available. Re-run with --target claude,codex,cursor or --path DIR.');
   }
 
-  const targets = supportedTargets();
   console.log('Choose harnesses to install review-council for:');
-  targets.forEach((target, index) => {
-    console.log(`  ${index + 1}. ${target.label} (${target.dir})`);
+  targetDefinitions.forEach((target, index) => {
+    console.log(`  ${index + 1}. ${target.label} (${target.dir()})`);
   });
   console.log('  a. All harnesses');
 
@@ -106,16 +136,16 @@ async function promptForTargets() {
   try {
     const answer = (await rl.question('Select one or more numbers, comma-separated [1]: ')).trim() || '1';
     if (answer.toLowerCase() === 'a' || answer.toLowerCase() === 'all') {
-      return targets.map((target) => target.id);
+      return targetDefinitions.map((target) => target.id);
     }
 
     const selected = new Set();
     for (const part of answer.split(',')) {
       const index = Number(part.trim());
-      if (!Number.isInteger(index) || index < 1 || index > targets.length) {
+      if (!Number.isInteger(index) || index < 1 || index > targetDefinitions.length) {
         throw new Error(`Invalid selection: ${part.trim()}`);
       }
-      selected.add(targets[index - 1].id);
+      selected.add(targetDefinitions[index - 1].id);
     }
     return [...selected];
   } finally {
@@ -133,17 +163,106 @@ function copyDir(src, dest) {
   }
 }
 
-function installInto(skillsDir, args) {
+function backupDestination(skillsDir) {
+  const backupRoot = path.join(path.dirname(skillsDir), `${path.basename(skillsDir)}-backups`);
+  fs.mkdirSync(backupRoot, { recursive: true });
+
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  let candidate = path.join(backupRoot, `review-council-${timestamp}`);
+  let suffix = 1;
+  while (fs.existsSync(candidate)) {
+    candidate = path.join(backupRoot, `review-council-${timestamp}-${suffix}`);
+    suffix += 1;
+  }
+  return candidate;
+}
+
+function preflightInstall(skillsDirValue, args) {
+  const skillsDir = path.resolve(skillsDirValue);
   const dest = path.join(skillsDir, 'review-council');
-  if (fs.existsSync(dest) && !args.force && !args.dryRun) {
-    throw new Error(`${dest} already exists. Re-run with --force to overwrite.`);
+  const exists = fs.existsSync(dest);
+
+  if (exists && !args.force) {
+    const prefix = args.dryRun ? '[dry-run] Conflict:' : 'Installation blocked:';
+    throw new Error(`${prefix} ${dest} already exists. Re-run with --force to replace it safely.`);
   }
 
-  const existsNote = fs.existsSync(dest) && args.dryRun ? ' (already exists; use --force to overwrite)' : '';
-  console.log(`${args.dryRun ? '[dry-run] Would install' : 'Installing'} review-council to ${dest}${existsNote}`);
-  if (args.dryRun) return;
-  fs.rmSync(dest, { recursive: true, force: true });
-  copyDir(sourceSkill, dest);
+  return { skillsDir, dest, exists };
+}
+
+function installInto(plan, args) {
+  const { skillsDir, dest, exists } = plan;
+
+  if (args.dryRun) {
+    console.log(`[dry-run] Would install review-council to ${dest}${exists ? ' and back up the existing install' : ''}`);
+    return;
+  }
+
+  fs.mkdirSync(skillsDir, { recursive: true });
+  const stagingDir = fs.mkdtempSync(path.join(skillsDir, '.review-council-install-'));
+  let backup = null;
+
+  try {
+    copyDir(sourceSkill, stagingDir);
+    if (exists) {
+      backup = backupDestination(skillsDir);
+      fs.renameSync(dest, backup);
+    }
+    fs.renameSync(stagingDir, dest);
+  } catch (error) {
+    const recoveryNotes = [];
+
+    if (backup && !fs.existsSync(dest) && fs.existsSync(backup)) {
+      try {
+        fs.renameSync(backup, dest);
+      } catch (restoreError) {
+        recoveryNotes.push(`Automatic restore failed: ${restoreError.message}`);
+      }
+    }
+
+    if (fs.existsSync(stagingDir)) {
+      try {
+        fs.rmSync(stagingDir, { recursive: true, force: true });
+      } catch (cleanupError) {
+        recoveryNotes.push(`Staging cleanup failed at ${stagingDir}: ${cleanupError.message}`);
+      }
+    }
+
+    if (backup && fs.existsSync(backup)) {
+      recoveryNotes.push(`The previous install remains recoverable at ${backup}.`);
+    }
+
+    const suffix = recoveryNotes.length > 0 ? ` ${recoveryNotes.join(' ')}` : '';
+    throw new Error(`${error.message}${suffix}`, { cause: error });
+  }
+
+  console.log(`Installed review-council to ${dest}`);
+  if (backup) console.log(`Previous install moved to ${backup}`);
+}
+
+function warnAboutDuplicateInstalls(selectedTargets) {
+  const usesSharedInstall = selectedTargets.some((target) => target === 'codex' || target === 'cursor');
+  if (!usesSharedInstall) return;
+
+  const sharedInstall = path.resolve(targetDefinition('codex').dir(), 'review-council');
+  const candidates = [];
+
+  const legacyCodexRoot = process.env.CODEX_HOME || path.join(userHome(), '.codex');
+  candidates.push({
+    label: 'legacy Codex',
+    install: path.resolve(legacyCodexRoot, 'skills', 'review-council')
+  });
+
+  candidates.push({
+    label: 'Cursor-specific',
+    install: path.resolve(userHome(), '.cursor', 'skills', 'review-council')
+  });
+
+  for (const candidate of candidates) {
+    if (candidate.install !== sharedInstall && fs.existsSync(candidate.install)) {
+      console.warn(`Warning: ${candidate.label} install detected at ${candidate.install}; it is not modified. After verifying ${sharedInstall}, remove that copy to prevent duplicate discovery, or update it explicitly with --path ${path.dirname(candidate.install)} --force.`);
+    }
+  }
 }
 
 async function main() {
@@ -154,26 +273,29 @@ async function main() {
   }
   if (args.command !== 'install') throw new Error(`Unsupported command: ${args.command}`);
   if (!fs.existsSync(path.join(sourceSkill, 'SKILL.md'))) {
-    throw new Error(`Package is missing skill/review-council/SKILL.md at ${sourceSkill}`);
+    throw new Error(`Package is missing skills/review-council/SKILL.md at ${sourceSkill}`);
   }
 
   if (args.path) {
-    installInto(path.resolve(expandHome(args.path)), args);
-    console.log(args.dryRun ? 'Dry run complete.' : 'Installed review-council skill.');
+    const plan = preflightInstall(path.resolve(expandHome(args.path)), args);
+    installInto(plan, args);
     return;
   }
 
   const selectedTargets = args.target ? parseTargets(args.target) : await promptForTargets();
   if (selectedTargets.length === 0) throw new Error('No targets selected.');
 
-  for (const selectedTarget of selectedTargets) {
-    installInto(targetDir(selectedTarget), args);
+  const destinations = new Map();
+  for (const target of selectedTargets) {
+    const definition = targetDefinition(target);
+    destinations.set(definition.dir(), definition.label);
   }
 
-  console.log(args.dryRun ? 'Dry run complete.' : 'Installed review-council skill.');
-  if (selectedTargets.includes('claude')) {
-    console.log('Claude Code should expose this as /review-council. Restart Claude Code if the command is not visible.');
-  }
+  const plans = [...destinations.keys()].map((skillsDir) => preflightInstall(skillsDir, args));
+  warnAboutDuplicateInstalls(selectedTargets);
+  for (const plan of plans) installInto(plan, args);
+
+  console.log(args.dryRun ? 'Dry run complete.' : 'Installation complete. Restart the harness if the skill is not detected automatically.');
 }
 
 try {

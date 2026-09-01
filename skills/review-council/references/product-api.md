@@ -21,9 +21,13 @@ Determine whether the change preserves intended product behavior and does not br
 - Does the change alter user-visible behavior, UX copy, notifications, permissions, billing, analytics, or data availability?
 - Is the behavior controlled by feature flags/rollout when risk warrants it?
 
-## Flag Aggressively
+## Prioritize
 
 Breaking API/schema changes without versioning or migration, spec drift, removed response fields, new required request fields, semantic behavior changes hidden behind same shape, non-idempotent retryable writes, unstable error shapes, unanalyzed downstream consumer risk, and product behavior changes without acceptance criteria.
+
+## Evidence bar
+
+Cite the changed contract and an affected caller, consumer, documented promise, migration path, or user-visible flow. When a downstream consumer is not available in the review context, report the compatibility question as an evidence gap rather than claiming a break.
 
 ## Suggested Verification
 

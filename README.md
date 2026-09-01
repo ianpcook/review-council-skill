@@ -1,142 +1,91 @@
-# review-council-skill
+# review-council
 
-Install the `review-council` agent skill: a single entrypoint that runs a multi-lane, read-only code review council.
+An adversarial, multi-lane code-review skill for Agent Skills-compatible coding agents.
+
+`review-council` reviews one frozen diff or pull request across correctness, security/privacy, tests, maintainability, and product/API behavior. An independent critic then challenges the candidate findings before the skill returns one evidence-grounded merge verdict. The council is review-only and never fixes or publishes changes unless the user starts a separate action.
+
+The canonical skill package is [`skills/review-council`](skills/review-council). It follows the [Agent Skills open specification](https://agentskills.io/specification) and contains no harness-specific tool calls, so the same instructions work in Claude Code, Codex, Cursor, and other compatible agents. Harness-specific invocation syntax is optional.
 
 ## Install
 
-From GitHub:
+Install interactively from GitHub:
 
 ```bash
-npx --yes github:ianpcook/review-council-skill install
+npx --yes github:ianpcook/review-council-skill#v0.3.0 install
 ```
 
-The installer will ask which harnesses to install for. Select one or more targets from the prompt.
-
-Install non-interactively:
+Install for one harness:
 
 ```bash
-npx --yes github:ianpcook/review-council-skill install --target claude
-npx --yes github:ianpcook/review-council-skill install --target codex
-npx --yes github:ianpcook/review-council-skill install --target agents
-npx --yes github:ianpcook/review-council-skill install --target cursor
-npx --yes github:ianpcook/review-council-skill install --target claude,codex
-npx --yes github:ianpcook/review-council-skill install --target all
+npx --yes github:ianpcook/review-council-skill#v0.3.0 install --target claude
+npx --yes github:ianpcook/review-council-skill#v0.3.0 install --target codex
+npx --yes github:ianpcook/review-council-skill#v0.3.0 install --target cursor
 ```
 
-Install to a custom skills directory:
+Install for all three:
 
 ```bash
-npx --yes github:ianpcook/review-council-skill install --path ~/.codex/skills
+npx --yes github:ianpcook/review-council-skill#v0.3.0 install --target all
 ```
 
-Dry run:
+The installer uses the current user-level locations:
+
+| Target | Install directory |
+| --- | --- |
+| Claude Code | `~/.claude/skills/review-council` |
+| Codex / shared Agent Skills | `~/.agents/skills/review-council` |
+| Cursor | `~/.agents/skills/review-council` (shared with Codex) |
+
+The legacy `agents` target remains an alias for `codex`. To support another compatible harness, install into an explicit skills directory:
 
 ```bash
-npx --yes github:ianpcook/review-council-skill install --dry-run
+npx --yes github:ianpcook/review-council-skill#v0.3.0 install --path /path/to/skills
 ```
 
-Overwrite an existing install:
+Use `--dry-run` to inspect the destination. Existing installs are never overwritten implicitly. `--force` moves the previous installation into a sibling `skills-backups` directory before replacing it, so it remains recoverable.
 
-```bash
-npx --yes github:ianpcook/review-council-skill install --force
-```
+Codex previously discovered personal skills under `~/.codex/skills` (or `$CODEX_HOME/skills`). Cursor also supports a native `~/.cursor/skills` directory, but discovers the shared directory too. The installer targets `~/.agents/skills` for both Codex and Cursor and warns when it detects an older harness-specific copy; after verifying the shared install, remove the old copy to avoid duplicate discovery.
 
-If this package is later published to npm, the same installer works as:
+Agents with their own GitHub skill installer can install directly from [`skills/review-council`](https://github.com/ianpcook/review-council-skill/tree/v0.3.0/skills/review-council) instead of using the Node installer.
 
-```bash
-npx review-council-skill install
-```
+## Use
 
-## npm Warnings
-
-If `npx` prints warnings like:
+Ask naturally:
 
 ```text
-npm warn Unknown project config "auto-install-peers"
-npm warn Unknown project config "strict-peer-dependencies"
-npm warn Unknown project config "shamefully-hoist"
+Use review-council on this branch against the repository's default branch.
 ```
 
-those warnings usually come from a local `.npmrc` containing pnpm-specific settings. They are not emitted by this package and do not normally block installation.
+Harness-specific explicit forms also work:
 
-If `npx` prints `Need to install the following packages`, that is the normal interactive prompt. Use `--yes` to skip it:
+```text
+/review-council base=main lanes=all
+$review-council review this pull request
+```
+
+Available lanes:
+
+- `correctness`
+- `security-privacy`
+- `test-verification`
+- `thermo` (strict maintainability)
+- `product-api`
+
+If independent subagents are unavailable, the skill runs separated lane passes in one context and discloses that fallback in its report.
+
+## Method and attribution
+
+The critic loop adapts Qiu and Gill's [Adversarial Review: Structured Disagreement for Grounded Agentic Code Review](https://arxiv.org/abs/2608.18167), accepted to the ICML 2026 Workshop on DL4C.
+
+The `thermo` lane adapts Cursor's MIT-licensed [Thermo-Nuclear Code Quality Review](https://github.com/cursor/plugins/tree/main/cursor-team-kit/skills/thermo-nuclear-code-quality-review). See [`NOTICE`](NOTICE) for the complete third-party notice.
+
+## Validate
 
 ```bash
-npx --yes github:ianpcook/review-council-skill install
+npm test
+uvx --from skills-ref agentskills validate ./skills/review-council
+npm pack --dry-run
 ```
-
-## What It Does
-
-`review-council` gathers review context once, runs independent read-only review lanes, then synthesizes one severity-ranked report.
-
-Default lanes:
-
-- `thermo`: maintainability, abstraction, decomposition, file size, spaghetti, code-judo simplification.
-- `correctness`: acceptance criteria, logic bugs, edge cases, regressions, plausible-but-wrong behavior.
-- `security-privacy`: auth, authorization, data exposure, secrets, injection, dependency/security-sensitive changes.
-- `test-verification`: whether tests and verification actually prove behavior, CI quality, mutation/coverage risk, test changes.
-- `product-api`: API/product behavior, backwards compatibility, contracts, user-visible behavior, integration boundaries.
-
-The council is review-only. It should not edit files or run a fixer during the review pass.
-
-## Attribution
-
-The `thermo` maintainability lane adapts the Thermo-Nuclear Code Quality Review rubric from Cursor's `cursor-team-kit` plugin:
-
-- Original skill: https://github.com/cursor/plugins/blob/main/cursor-team-kit/skills/thermo-nuclear-code-quality-review/SKILL.md
-- Original subagent wrapper: https://github.com/cursor/plugins/blob/main/cursor-team-kit/agents/thermo-nuclear-code-quality-review.md
-
-The `review-council` package uses that idea as one council member and adds separate correctness, security/privacy, test-verification, and product/API review lanes.
-
-## Usage
-
-After installing, ask your agent to use the skill:
-
-```text
-Use review-council on this branch against main.
-```
-
-Or:
-
-```text
-/review-council base=main scope=diff lanes=all
-```
-
-For a faster pass:
-
-```text
-/review-council lanes=thermo,correctness
-```
-
-## Claude Code Notes
-
-For Claude Code, the install must land at:
-
-```text
-~/.claude/skills/review-council/SKILL.md
-```
-
-Claude Code uses the skill directory name as the slash command, so this should appear as:
-
-```text
-/review-council
-```
-
-If `/review-council` does not appear:
-
-1. Confirm the file exists:
-
-   ```bash
-   ls ~/.claude/skills/review-council/SKILL.md
-   ```
-
-2. Restart Claude Code. Claude watches existing skill directories for changes, but if `~/.claude/skills/` did not exist when the session started, a restart may be required.
-
-3. Reinstall explicitly for Claude:
-
-   ```bash
-   npx --yes github:ianpcook/review-council-skill install --target claude --force
-   ```
 
 ## License
 
