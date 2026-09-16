@@ -4,7 +4,7 @@ description: Run an adversarial, multi-lane, read-only review of a code diff or 
 license: MIT
 metadata:
   author: ianpcook
-  version: "0.3.0"
+  version: "0.4.0"
 ---
 
 # Review Council
@@ -22,6 +22,8 @@ Accept natural-language requests and agent-specific invocations such as `/review
 - Scope: changed code and the surrounding source needed to establish behavior. Do not turn a diff review into a repository-wide audit unless requested.
 - Lanes: all relevant lanes by default. Skip a lane only when it is clearly irrelevant, the user excluded it, or the environment cannot support it; report every omission.
 - Fixing: off. A later fixer pass may address only accepted findings after the review is complete.
+- Receipt: on. A completed council writes one local receipt recording the verdict against the reviewed head. See [references/receipts.md](references/receipts.md).
+- Posting: off. Post the report to a pull request only on an explicit request, such as `--post` or "post this to the PR".
 
 ## Non-negotiables
 
@@ -35,7 +37,7 @@ Accept natural-language requests and agent-specific invocations such as `/review
 - Ground every retained finding in the reviewed artifact. Cite `path:line`, a diff hunk, or an equally precise code reference; identify the triggering input or state and explain the impact.
 - Treat passing tests as evidence, not proof. Inspect whether the tests exercise the claimed behavior.
 - Prefer a few high-confidence findings over speculative warnings or cosmetic noise.
-- Do not post to a pull request or other external system unless the user explicitly requests it.
+- Do not post to a pull request or other external system unless the user explicitly requests it. Writing the local receipt is not posting.
 
 ## Workflow
 
@@ -55,6 +57,7 @@ Accept natural-language requests and agent-specific invocations such as `/review
 - Tests and verification: [references/test-verification.md](references/test-verification.md)
 - Product and API behavior: [references/product-api.md](references/product-api.md)
 - Final report: [references/output-schema.md](references/output-schema.md)
+- Receipt: [references/receipts.md](references/receipts.md)
 
 ### 3. Produce independent candidate findings
 
@@ -104,9 +107,17 @@ When no independent critic is available, perform one explicitly labeled self-cri
 - Include verification performed or recommended, council execution mode, lanes run, critic rounds, omissions, and evidence gaps.
 - If nothing survives, say so plainly and name residual risk from unrun checks or missing context.
 
-### 6. Stop before fixing
+### 6. Record the receipt
+
+Write one local receipt for the completed council, following [references/receipts.md](references/receipts.md). Write it after the report is final, and only when the council reached a verdict. Take the values from the report; do not recompute or soften them. A council that aborted, could not resolve its target, or was interrupted leaves no receipt, because a missing receipt correctly reads as "not reviewed".
+
+Name the receipt for the reviewed head commit so it cannot outlive what it describes. A later push produces a different name, and the stale receipt stops matching.
+
+### 7. Stop before fixing
 
 Return the report and stop. If the user asks for fixes, begin a separate scoped implementation pass using only accepted findings, unless the user explicitly expands the scope.
+
+Post the report to the pull request only when the user asked for that. A receipt never implies posting, and posting never replaces the receipt.
 
 ## Severity
 
