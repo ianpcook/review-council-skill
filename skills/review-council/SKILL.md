@@ -4,7 +4,7 @@ description: Run an adversarial, multi-lane, read-only review of a code diff or 
 license: MIT
 metadata:
   author: ianpcook
-  version: "0.4.0"
+  version: "0.5.0"
 ---
 
 # Review Council
@@ -48,6 +48,7 @@ Accept natural-language requests and agent-specific invocations such as `/review
 - Collect available intent: the user's request, issue text, pull-request description, acceptance criteria, and relevant commit messages.
 - Identify repository-native verification commands. Run only checks that are safe and proportionate; otherwise list them for the user.
 - Reuse this shared context for every lane so agents do not independently reinterpret the review boundary.
+- If a receipt exists for an earlier head of this same target, size the re-review against it before choosing lanes — see [references/receipts.md](references/receipts.md#sizing-a-re-review-against-a-stale-receipt).
 
 ### 2. Load the relevant lane briefs
 

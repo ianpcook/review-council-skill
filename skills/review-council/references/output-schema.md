@@ -49,7 +49,7 @@ List checks that actually ran with pass/fail status and a short result. Then lis
 End with:
 
 ```markdown
-Execution: independent subagents | grouped subagents | single-agent fallback
+Execution: independent subagents | grouped subagents | single-agent fallback | verification pass
 Lanes: <lanes run>
 Critic: independent | self-critique fallback | unavailable
 Critic rounds: N

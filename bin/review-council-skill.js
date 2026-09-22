@@ -40,7 +40,7 @@ function usage() {
   console.log(`review-council-skill
 
 Usage:
-  npx --yes github:ianpcook/review-council-skill#v0.4.0 install [--target claude,codex,cursor|all] [--path DIR] [--force] [--dry-run]
+  npx --yes github:ianpcook/review-council-skill#v0.5.0 install [--target claude,codex,cursor|all] [--path DIR] [--force] [--dry-run]
 
 Targets:
   claude  ~/.claude/skills

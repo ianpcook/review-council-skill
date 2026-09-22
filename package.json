@@ -1,6 +1,6 @@
 {
   "name": "review-council-skill",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "A portable adversarial, multi-lane code review skill for Agent Skills-compatible coding agents.",
   "license": "MIT",
   "private": true,
