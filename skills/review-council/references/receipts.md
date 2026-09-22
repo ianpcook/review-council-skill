@@ -130,3 +130,36 @@ not suppress it. `find` takes the pattern as a string and behaves the same in ba
 A PR with an earlier receipt at a different head has been reviewed, but not at its
 current tip. Report that as stale rather than as reviewed: the findings may be resolved,
 irrelevant, or newly wrong, and nothing in the receipt distinguishes those.
+
+## Sizing a re-review against a stale receipt
+
+A stale receipt is a summary, not a copy of the report: it gives counts by severity, not
+the findings themselves. A verification pass needs the itemized `BLOCK`/`FIX` findings to
+check the fix against — from this session's own earlier report, from a report the council
+posted to the PR (`gh pr view --comments`), or from another durable copy. When none of
+those exist, there is nothing concrete to verify against; treat the receipt as stale only
+and run the full council below.
+
+When the itemized findings are in hand, size the re-review by what the delta since the
+stale head actually is:
+
+**Verification pass** — every commit in the delta is described, in its own message, as
+addressing one or more `BLOCK`/`FIX` items from the stale report, and touches only the
+files and functions that report already covered: no new decision, no new mechanism. One
+reviewer — a subagent or self-directed reading — checks the stale report's `BLOCK`/`FIX`
+findings against the current artifact, confirms each is resolved as specified, and scans
+the delta for anything the fix itself newly introduces. Skip lane assignment and the
+independent critic round for this pass. If the scan surfaces something new, treat it
+exactly like a critic-proposed finding (workflow step 4): it needs its own evidence,
+trigger, and impact before it counts, and finding one is itself a sign the delta was not
+fix-only — stop and run the full council below instead of forcing it into this pass.
+
+**Full council** — a commit in the delta implements a new decision, a new mechanism, or
+touches files or behavior the stale report never reviewed. Run the workflow from step 1,
+scoped to the delta since the stale receipt's head, not the whole target again.
+
+Write the receipt the same way either time. For a verification pass, set `execution` to
+`"verification pass"` and `critic` to `"unavailable"` with `critic_rounds: 0` — no
+candidate findings were produced to challenge, unless the scan surfaced one, in which
+case that finding went through the normal critic protocol and the receipt reflects
+whichever `execution`/`critic` values that produced.

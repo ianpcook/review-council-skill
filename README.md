@@ -11,21 +11,21 @@ The canonical skill package is [`skills/review-council`](skills/review-council).
 Install interactively from GitHub:
 
 ```bash
-npx --yes github:ianpcook/review-council-skill#v0.4.0 install
+npx --yes github:ianpcook/review-council-skill#v0.5.0 install
 ```
 
 Install for one harness:
 
 ```bash
-npx --yes github:ianpcook/review-council-skill#v0.4.0 install --target claude
-npx --yes github:ianpcook/review-council-skill#v0.4.0 install --target codex
-npx --yes github:ianpcook/review-council-skill#v0.4.0 install --target cursor
+npx --yes github:ianpcook/review-council-skill#v0.5.0 install --target claude
+npx --yes github:ianpcook/review-council-skill#v0.5.0 install --target codex
+npx --yes github:ianpcook/review-council-skill#v0.5.0 install --target cursor
 ```
 
 Install for all three:
 
 ```bash
-npx --yes github:ianpcook/review-council-skill#v0.4.0 install --target all
+npx --yes github:ianpcook/review-council-skill#v0.5.0 install --target all
 ```
 
 The installer uses the current user-level locations:
@@ -39,14 +39,14 @@ The installer uses the current user-level locations:
 The legacy `agents` target remains an alias for `codex`. To support another compatible harness, install into an explicit skills directory:
 
 ```bash
-npx --yes github:ianpcook/review-council-skill#v0.4.0 install --path /path/to/skills
+npx --yes github:ianpcook/review-council-skill#v0.5.0 install --path /path/to/skills
 ```
 
 Use `--dry-run` to inspect the destination. Existing installs are never overwritten implicitly. `--force` moves the previous installation into a sibling `skills-backups` directory before replacing it, so it remains recoverable.
 
 Codex previously discovered personal skills under `~/.codex/skills` (or `$CODEX_HOME/skills`). Cursor also supports a native `~/.cursor/skills` directory, but discovers the shared directory too. The installer targets `~/.agents/skills` for both Codex and Cursor and warns when it detects an older harness-specific copy; after verifying the shared install, remove the old copy to avoid duplicate discovery.
 
-Agents with their own GitHub skill installer can install directly from [`skills/review-council`](https://github.com/ianpcook/review-council-skill/tree/v0.4.0/skills/review-council) instead of using the Node installer.
+Agents with their own GitHub skill installer can install directly from [`skills/review-council`](https://github.com/ianpcook/review-council-skill/tree/v0.5.0/skills/review-council) instead of using the Node installer.
 
 ## Use
 
